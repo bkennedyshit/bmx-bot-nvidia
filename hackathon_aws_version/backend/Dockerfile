@@ -6,7 +6,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-COPY ../../data ./data
+RUN mkdir -p data
+COPY processed_blogs.json ./data/
 
 EXPOSE 5000
 
