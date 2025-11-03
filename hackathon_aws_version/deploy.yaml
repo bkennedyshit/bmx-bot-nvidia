@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-coach-bot
+  labels:
+    app: ai-coach-bot
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-coach-bot
+  template:
+    metadata:
+      labels:
+        app: ai-coach-bot
+    spec:
+      containers:
+      - name: backend
+        image: your-ecr-repo/ai-coach-bot:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: NVIDIA_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: nvidia-credentials
+              key: api-key
+        - name: NVIDIA_NIM_BASE_URL
+          value: "https://integrate.api.nvidia.com/v1"
+        - name: NVIDIA_LLM_MODEL
+          value: "meta/llama-3.1-nemotron-nano-8b-instruct"
+        - name: NVIDIA_EMBEDDING_MODEL
+          value: "nvidia/nv-embedqa-e5-v5"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-coach-bot-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: ai-coach-bot
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
